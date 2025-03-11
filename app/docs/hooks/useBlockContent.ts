@@ -16,13 +16,14 @@ export const useBlockContent = ({
 
   useEffect(() => {
     if (textRef.current && contentRef.current === "") {
-      textRef.current.textContent = initialContent;
+      textRef.current.innerHTML = initialContent;
       contentRef.current = initialContent;
     }
   }, [initialContent]);
 
   const handleInput = () => {
-    const newContent = textRef.current?.textContent || "";
+    if (!textRef.current) return;
+    const newContent = textRef.current.innerHTML;
     if (newContent !== contentRef.current) {
       contentRef.current = newContent;
       onUpdate(id, newContent);
@@ -31,7 +32,7 @@ export const useBlockContent = ({
 
   const setContent = (content: string) => {
     if (textRef.current) {
-      textRef.current.textContent = content;
+      textRef.current.innerHTML = content;
       contentRef.current = content;
     }
   };

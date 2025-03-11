@@ -12,7 +12,7 @@ interface Block {
   ref: RefObject<TextHandle | null>;
 }
 
-export default function Home() {
+export default function Docs() {
   const [blocks, setBlocks] = useState<Block[]>([
     {
       id: "1",
@@ -145,6 +145,10 @@ export default function Home() {
 
         const [draggedItem] = items.splice(draggedIndex, 1);
         items.splice(targetIndex, 0, draggedItem);
+
+        setTimeout(() => {
+          blocks[draggedIndex].ref.current?.focus();
+        }, 0);
 
         return items;
       });

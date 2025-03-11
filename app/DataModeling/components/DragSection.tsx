@@ -121,7 +121,7 @@ const DragSection = ({ id, onRemove }: DragSectionProps) => {
     >
       <div className={`handle-${id} w-full h-full border`}>
         <textarea
-          className="w-full h-[calc(100%-40px)] resize-none border-none outline-none"
+          className="w-full h-full resize-none border-none outline-none"
           style={{ overflow: "auto" }}
         />
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import SideBox from "./_components/SideBox";
-import DragSection from "./_components/DragSection";
+import SideBox from "./components/SideBox";
+import DragSection from "./components/DragSection";
 
 export default function Home() {
   const [sections, setSections] = useState<number[]>([]);
