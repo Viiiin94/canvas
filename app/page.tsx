@@ -2,11 +2,11 @@ import Link from "next/link";
 
 const links = [
   {
-    url: "Docx",
+    url: "docs",
     name: "문서",
   },
   {
-    url: "",
+    url: "dataModeling",
     name: "데이터 모델링",
   },
 ];
