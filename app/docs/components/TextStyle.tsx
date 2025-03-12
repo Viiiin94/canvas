@@ -1,15 +1,18 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
+import { TEXT_STYLES } from "@/app/docs/constants/styles";
 
 interface TextStyleProps {
   isOpen: boolean;
   handleStyleMenu: () => void;
-  onStyleChange: (style: "bold" | "italic" | "underline") => void;
+  onStyleChange: (style: keyof typeof TEXT_STYLES) => void;
+  onAlignChange: (style: "text-left" | "text-center" | "text-right") => void;
 }
 
 const TextStyle = ({
   isOpen,
   handleStyleMenu,
   onStyleChange,
+  onAlignChange,
 }: TextStyleProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +100,26 @@ const TextStyle = ({
               />
             </svg>
             <span>밑 줄</span>
+          </button>
+        </div>
+        <div className="space-y-0.5">
+          <button
+            onClick={() => onAlignChange("text-left")}
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-100 rounded-md"
+          >
+            <span>왼쪽 정렬</span>
+          </button>
+          <button
+            onClick={() => onAlignChange("text-center")}
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-100 rounded-md"
+          >
+            <span>가운데 정렬</span>
+          </button>
+          <button
+            onClick={() => onAlignChange("text-right")}
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-100 rounded-md"
+          >
+            <span>오른쪽 정렬</span>
           </button>
         </div>
       </div>

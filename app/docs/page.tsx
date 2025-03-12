@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, createRef, useEffect, RefObject } from "react";
+import { useState, createRef, useEffect, RefObject, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 import Text from "./components/Text";
 import { TextHandle, BlockType } from "../type";
@@ -26,6 +27,9 @@ export default function Docs() {
   const [dragPosition, setDragPosition] = useState<"before" | "after" | null>(
     null
   );
+
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({ contentRef: printRef });
 
   useEffect(() => {
     blocks[0].ref.current?.focus();
@@ -171,8 +175,12 @@ export default function Docs() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200 p-4">
+      <button onClick={() => handlePrint()} className="pointer-cursor">
+        프린트
+      </button>
       <main className="p-4 bg-gray-100 rounded-lg shadow-sm">
         <article
+          ref={printRef}
           className="w-[210mm] h-[297mm] mx-auto bg-white
                             shadow-lg p-[20mm] box-border overflow-y-auto
                             print:shadow-none print:p-0"

@@ -1,30 +1,30 @@
 "use client";
 
-import React, { useState, useImperativeHandle, forwardRef } from "react";
+import { useState, useImperativeHandle, forwardRef, DragEvent } from "react";
 import { MdOutlineDragIndicator, MdMoreVert } from "react-icons/md";
 
+import TextStyle from "@/app/docs/components/TextStyle";
 import { BlockType, TextHandle } from "@/app/type";
 import { useBlockContent } from "@/app/docs/hooks/useBlockContent";
 import { useBlockType } from "@/app/docs/hooks/useBlockType";
 import { useBlockKeyboard } from "@/app/docs/hooks/useBlockKeyboard";
-import { BLOCK_STYLES } from "@/app/docs/constants/styles";
-import TextStyle from "./TextStyle";
+import { BLOCK_STYLES, TEXT_STYLES } from "@/app/docs/constants/styles";
 
 interface TextProps {
   id: string;
   type: BlockType;
   initialContent?: string;
+  isDragging: boolean;
+  isDraggedOver: boolean;
+  dragPosition: "before" | "after" | null;
   onEnter: (id: string) => void;
   onBackspace: (id: string) => void;
   onUpdate: (id: string, content: string) => void;
   onArrowUp: (id: string) => void;
   onArrowDown: (id: string) => void;
-  onDragStart: (e: React.DragEvent, id: string) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent, id: string) => void;
-  isDragging: boolean;
-  isDraggedOver: boolean;
-  dragPosition: "before" | "after" | null;
+  onDragStart: (e: DragEvent, id: string) => void;
+  onDragOver: (e: DragEvent) => void;
+  onDrop: (e: DragEvent, id: string) => void;
   onChangeType: (id: string, type: BlockType, content: string) => void;
 }
 
@@ -34,6 +34,9 @@ const Text = forwardRef<TextHandle, TextProps>(
       id,
       type,
       initialContent = "",
+      isDragging,
+      isDraggedOver,
+      dragPosition,
       onEnter,
       onBackspace,
       onUpdate,
@@ -42,15 +45,14 @@ const Text = forwardRef<TextHandle, TextProps>(
       onDragStart,
       onDragOver,
       onDrop,
-      isDragging,
-      isDraggedOver,
-      dragPosition,
       onChangeType,
     },
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
     const [isOpenStyleMenu, setIsOpenStyleMenu] = useState(false);
+    const [activeStyles, setActiveStyles] = useState<Set<string>>(new Set());
+    const [alignStyle, setAlignStyle] = useState<string>("");
 
     const { textRef, handleInput, setContent } = useBlockContent({
       initialContent,
@@ -91,50 +93,33 @@ const Text = forwardRef<TextHandle, TextProps>(
       },
     }));
 
-    const handleStyleChange = (style: "bold" | "italic" | "underline") => {
+    const handleStyleChange = (style: keyof typeof TEXT_STYLES) => {
       if (!textRef.current) return;
 
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      const range = selection.getRangeAt(0);
-      const selectedText = range.toString();
-
-      const toggleStyle = (element: HTMLElement, style: string) => {
-        const styleClasses = {
-          bold: "font-bold",
-          italic: "italic",
-          underline: "underline",
-        };
-        const className = styleClasses[style as keyof typeof styleClasses];
-
-        if (element.classList.contains(className)) {
-          element.classList.remove(className);
+      setActiveStyles((prev) => {
+        const newStyles = new Set(prev);
+        if (newStyles.has(TEXT_STYLES[style])) {
+          newStyles.delete(TEXT_STYLES[style]);
         } else {
-          element.classList.add(className);
+          newStyles.add(TEXT_STYLES[style]);
         }
-      };
-
-      if (selectedText) {
-        const span = document.createElement("span");
-        toggleStyle(span, style);
-        try {
-          range.surroundContents(span);
-        } catch (_) {
-          const existSpan = range.commonAncestorContainer.parentElement;
-          if (existSpan?.tagName === "SPAN") {
-            toggleStyle(existSpan, style);
-          }
-        }
-      } else {
-        toggleStyle(textRef.current, style);
-      }
+        return newStyles;
+      });
 
       onUpdate(id, textRef.current.innerHTML);
     };
 
     const handleStyleMenu = () => {
       setIsOpenStyleMenu(!isOpenStyleMenu);
+    };
+
+    const handleClickDivState = (
+      align: "text-left" | "text-center" | "text-right"
+    ) => {
+      if (!textRef.current) return;
+
+      setAlignStyle((prev) => (prev === align ? "" : align));
+      handleStyleMenu();
     };
 
     return (
@@ -165,7 +150,9 @@ const Text = forwardRef<TextHandle, TextProps>(
             className={`outline-none w-full min-h-[1.5em] px-2 py-1 rounded transition-all duration-200
             ${isFocused ? "bg-blue-50" : "hover:bg-gray-50"}
             ${isDraggedOver ? "ring-2 ring-blue-200" : ""}
-            ${BLOCK_STYLES[type]}`}
+            ${BLOCK_STYLES[type]}
+            ${Array.from(activeStyles).join(" ")}
+            ${alignStyle}`}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             onDragOver={(e) => e.preventDefault()}
@@ -190,6 +177,7 @@ const Text = forwardRef<TextHandle, TextProps>(
             isOpen={isOpenStyleMenu}
             handleStyleMenu={handleStyleMenu}
             onStyleChange={handleStyleChange}
+            onAlignChange={handleClickDivState}
           />
         )}
       </>
