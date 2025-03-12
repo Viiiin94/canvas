@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 쁘디 프로젝트트
 
-## Getting Started
-
-First, run the development server:
+회사 직원들과 얘기 중에 흠칫해서 만들어본 쁘띠프로젝트
 
 ```bash
+npm install
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+프로젝트: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 개발환경
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+IDE: Cursor
+AI: claude-sonnet 3.5, V0
+Front: Next.js, React, Typescript, Tailwind
 
-## Learn More
+### 웹 화면에서 데이터베이스 모델링 / 노션같은 페이지 제작
 
-To learn more about Next.js, take a look at the following resources:
+말 그대로 데이터베이스 모델링을 만들어 봤습니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+노션같은 페이지를 제작했습니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+input이 아닌 ref와 innerHTML을 활용해서 작성했습니다.
 
-## Deploy on Vercel
+input을 사용해서 value를 보내는 것이 아닌 영역의 이벤트를 활용하고자 2가지 방법을 사용했습니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+키보드이벤트를 활용하여 "Enter"로 입력될 때 다른 Text란이 새롭게 나오고 "Shift + Enter"을 입력해야 아랫 줄이 생성되는 기능을 구현했습니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+이 프로젝트의 최대 단점은 그냥 실행시간이 느리고 컴포넌트화가 미약하게 되었습니다.
