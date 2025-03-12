@@ -1,13 +1,18 @@
 "use client";
 
-import { useState, useRef, MouseEvent, useEffect } from "react";
-import { Parameter } from "@/app/type";
+import type React from "react";
+import { useState, useRef, useEffect } from "react";
+import type { Parameter } from "@/app/type";
 
 interface DragSectionProps {
   id: number;
   initialName: string;
-  initialParameters: number;
+  initialParameters: number | Parameter[];
   onRemove: () => void;
+  startConnection?: () => void;
+  isConnecting?: boolean;
+  isActiveConnection?: boolean;
+  onPositionChange?: () => void;
 }
 
 const DragSection = ({
@@ -15,130 +20,173 @@ const DragSection = ({
   initialName,
   initialParameters,
   onRemove,
+  startConnection,
+  isConnecting = false,
+  isActiveConnection = false,
+  onPositionChange,
 }: DragSectionProps) => {
-  const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [size, setSize] = useState({
-    width: 250,
-    height: Math.max(150, initialParameters * 30 + 80),
-  });
-  const [isDragging, setIsDragging] = useState(false);
-  const [tableName, setTableName] = useState(initialName);
-  const [parameters, setParameters] = useState<Parameter[]>(
-    Array.from({ length: initialParameters }, (_, i) => ({
-      id: `param-${i}`,
-      name: `parameter`,
-      type: "string",
-    }))
-  );
-  const dragRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef({ x: 0, y: 0 });
-
-  const handleTableNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTableName(e.target.value);
-  };
-
-  const handleParameterChange = (
-    id: string,
-    field: "name" | "type",
-    value: string
-  ) => {
-    setParameters((prev) =>
-      prev.map((param) =>
-        param.id === id ? { ...param, [field]: value } : param
-      )
-    );
-  };
-
-  const handleRemoveParameter = (id: string) => {
-    setParameters((prev) => prev.filter((param) => param.id !== id));
-    setSize((prev) => ({
-      ...prev,
-      height: Math.max(150, (parameters.length - 1) * 30 + 80),
-    }));
-  };
-
-  const addParameter = () => {
-    const newParam = {
-      id: `param-${Date.now()}`,
-      name: `파라미터${parameters.length + 1}`,
-      type: "string",
+  const [position, setPosition] = useState(() => {
+    // id를 작은 숫자로 변환하여 사용 (0부터 시작하는 인덱스처럼)
+    const smallerId = typeof id === "number" ? id % 10 : 0;
+    return {
+      x: 100 + (smallerId % 3) * 350,
+      y: 100 + Math.floor(smallerId / 3) * 250,
     };
-    setParameters((prev) => [...prev, newParam]);
-    setSize((prev) => ({
-      ...prev,
-      height: Math.max(150, (parameters.length + 1) * 30 + 80),
-    }));
+  });
+  const [size, setSize] = useState({ width: 300, height: 250 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState("");
+  const [tableName, setTableName] = useState(initialName);
+
+  // Generate initial parameters if a number was provided
+  const generateInitialParams = () => {
+    if (typeof initialParameters === "number") {
+      console.log(`Generating ${initialParameters} parameters for table ${id}`); // 디버깅용 로그 추가
+      return Array.from({ length: initialParameters }, (_, i) => ({
+        id: `p${id}-${i}`,
+        name: i === 0 ? "id" : `field${i}`,
+        type: i === 0 ? "number" : "string",
+      }));
+    }
+    return initialParameters as Parameter[];
   };
 
-  const handleMouseDown = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
+  const [parameters, setParameters] = useState<Parameter[]>(
+    generateInitialParams
+  );
 
-    if (target.closest(`.handle-${id}`)) {
-      setIsDragging(true);
-      const rect = dragRef.current?.getBoundingClientRect();
-      if (rect) {
-        offsetRef.current = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
+  const dragRef = useRef<HTMLDivElement>(null);
+  const startPos = useRef({ x: 0, y: 0 });
+  const startSize = useRef({ width: 0, height: 0 });
+
+  // Handle mouse down for dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("[data-resize]")) {
+      // Handle resize
+      const direction = (e.target as HTMLElement).getAttribute("data-resize");
+      if (direction) {
+        setIsResizing(true);
+        setResizeDirection(direction);
+        startPos.current = { x: e.clientX, y: e.clientY };
+        startSize.current = { ...size };
       }
+    } else {
+      // Handle drag
+      setIsDragging(true);
+      startPos.current = {
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      };
     }
   };
 
+  // Handle mouse move for dragging and resizing
   useEffect(() => {
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        const rect = dragRef.current?.parentElement?.getBoundingClientRect();
-        if (rect) {
-          const newX = e.clientX - rect.left - offsetRef.current.x;
-          const newY = e.clientY - rect.top - offsetRef.current.y;
+        const newPosition = {
+          x: e.clientX - startPos.current.x,
+          y: e.clientY - startPos.current.y,
+        };
 
-          const maxX = rect.width - (dragRef.current?.offsetWidth || 0);
-          const maxY = rect.height - (dragRef.current?.offsetHeight || 0);
+        setPosition(newPosition);
+      } else if (isResizing) {
+        const dx = e.clientX - startPos.current.x;
+        const dy = e.clientY - startPos.current.y;
 
-          setPosition({
-            x: Math.max(0, Math.min(newX, maxX)),
-            y: Math.max(0, Math.min(newY, maxY)),
-          });
+        if (resizeDirection === "e" || resizeDirection === "se") {
+          setSize((prev) => ({
+            ...prev,
+            width: Math.max(200, startSize.current.width + dx),
+          }));
+        }
+
+        if (resizeDirection === "s" || resizeDirection === "se") {
+          setSize((prev) => ({
+            ...prev,
+            height: Math.max(150, startSize.current.height + dy),
+          }));
         }
       }
     };
 
     const handleMouseUp = () => {
+      if (isDragging || isResizing) {
+        // 드래그나 리사이즈가 끝났을 때 부모에게 알림
+        if (onPositionChange) {
+          setTimeout(onPositionChange, 0);
+        }
+      }
+
       setIsDragging(false);
+      setIsResizing(false);
     };
 
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+    if (isDragging || isResizing) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, isResizing, resizeDirection, onPositionChange]);
+
+  // 컴포넌트가 마운트된 후 부모에게 알림
+  useEffect(() => {
+    if (onPositionChange) {
+      // DOM이 업데이트된 후 위치 변경 알림
+      const timer = setTimeout(onPositionChange, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [onPositionChange]);
+
+  // Handle parameter changes
+  const handleParameterChange = (id: string, field: string, value: string) => {
+    setParameters(
+      parameters.map((param) =>
+        param.id === id ? { ...param, [field]: value } : param
+      )
+    );
+  };
+
+  // Handle parameter removal
+  const handleRemoveParameter = (id: string) => {
+    setParameters(parameters.filter((param) => param.id !== id));
+  };
+
+  // Add new parameter
+  const addParameter = () => {
+    setParameters([
+      ...parameters,
+      { id: `p${id}-${Date.now()}`, name: "", type: "string" },
+    ]);
+  };
 
   return (
     <div
       ref={dragRef}
-      className="absolute bg-white overflow-hidden"
+      id={`table-${id}`}
+      className="absolute rounded-lg shadow-lg border border-gray-200 overflow-hidden bg-white"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: `${size.width}px`,
         height: `${size.height}px`,
         cursor: isDragging ? "grabbing" : "auto",
+        zIndex: 10,
       }}
       onMouseDown={handleMouseDown}
     >
-      <div className={`handle-${id} w-full h-full flex flex-col border`}>
-        {/* Header - Reduced height */}
+      <div className="w-full h-full flex flex-col">
+        {/* Header */}
         <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-1.5 px-3 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center flex-1">
             <input
               value={tableName}
-              onChange={handleTableNameChange}
+              onChange={(e) => setTableName(e.target.value)}
               className="font-medium text-gray-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 focus:ring-opacity-50 px-1 py-0.5 rounded text-sm"
               placeholder="Table name"
             />
@@ -163,6 +211,32 @@ const DragSection = ({
               </svg>
               <span className="sr-only">파라미터 추가</span>
             </button>
+            {startConnection && (
+              <button
+                onClick={startConnection}
+                className={`p-1 rounded-full transition-colors ${
+                  isActiveConnection
+                    ? "bg-blue-100 text-blue-600"
+                    : isConnecting
+                    ? "bg-blue-50 text-blue-500 hover:bg-blue-100"
+                    : "text-gray-400 hover:text-blue-500 hover:bg-gray-100"
+                }`}
+                title="테이블 연결"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            )}
             <button
               onClick={onRemove}
               className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100"
@@ -213,14 +287,18 @@ const DragSection = ({
                     />
                   </td>
                   <td className="py-1 px-2">
-                    <input
-                      type="text"
+                    <select
                       value={param.type}
                       onChange={(e) =>
                         handleParameterChange(param.id, "type", e.target.value)
                       }
-                      className="w-full text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 py-0.5"
-                    />
+                      className="w-full text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 py-0.5 appearance-none cursor-pointer"
+                    >
+                      <option value="string">String</option>
+                      <option value="number">Number</option>
+                      <option value="boolean">Boolean</option>
+                      <option value="date">Date</option>
+                    </select>
                   </td>
                   <td className="py-1 px-1 text-center">
                     <button
@@ -257,6 +335,18 @@ const DragSection = ({
           </table>
         </div>
       </div>
+      <div
+        className="absolute right-0 top-1/2 w-1 h-8 bg-gray-200 hover:bg-blue-400 cursor-e-resize -translate-y-1/2 opacity-0 hover:opacity-100 transition-opacity duration-200"
+        data-resize="e"
+      />
+      <div
+        className="absolute bottom-0 left-1/2 h-1 w-8 bg-gray-200 hover:bg-blue-400 cursor-s-resize -translate-x-1/2 opacity-0 hover:opacity-100 transition-opacity duration-200"
+        data-resize="s"
+      />
+      <div
+        className="absolute bottom-0 right-0 w-3 h-3 rounded-tl-sm bg-gray-200 hover:bg-blue-400 cursor-se-resize opacity-0 hover:opacity-100 transition-opacity duration-200"
+        data-resize="se"
+      />
     </div>
   );
 };

@@ -1,12 +1,10 @@
-import React from "react";
-
 interface ConnectionLineProps {
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
-  isActive: boolean;
-  onClick: () => void;
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
 const ConnectionLine = ({
@@ -14,15 +12,28 @@ const ConnectionLine = ({
   fromY,
   toX,
   toY,
-  isActive,
+  isActive = false,
   onClick,
 }: ConnectionLineProps) => {
-  const midX = (fromX + toX) / 2;
-  const midY = (fromY + toY) / 2;
+  // Calculate control points for a curved line
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const path = `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+  // Adjust curve based on distance
+  const curveFactor = Math.min(0.3, 100 / distance);
+
+  // Create control points for a curved path
+  const controlX1 = fromX + dx * curveFactor;
+  const controlY1 = fromY + dy * 0.1;
+  const controlX2 = toX - dx * curveFactor;
+  const controlY2 = toY - dy * 0.1;
+
+  // Create a curved path
+  const path = `M ${fromX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${toX} ${toY}`;
+
   return (
-    <g onClick={onClick} className="cursor-pointer">
+    <g onClick={onClick} className={onClick ? "cursor-pointer" : ""}>
       {/* Main connection line */}
       <path
         d={path}
@@ -30,36 +41,20 @@ const ConnectionLine = ({
         stroke={isActive ? "#3b82f6" : "#94a3b8"}
         strokeWidth={isActive ? 2 : 1.5}
         strokeDasharray={isActive ? "none" : "4,4"}
-      />
-
-      {/* Start point */}
-      <circle
-        cx={fromX}
-        cy={fromY}
-        r={4}
-        fill="white"
-        stroke={isActive ? "#3b82f6" : "#94a3b8"}
-        strokeWidth={1.5}
-      />
-
-      {/* End point */}
-      <circle
-        cx={toX}
-        cy={toY}
-        r={4}
-        fill="white"
-        stroke={isActive ? "#3b82f6" : "#94a3b8"}
-        strokeWidth={1.5}
+        pointerEvents="stroke"
       />
 
       {/* Invisible wider path for easier clicking */}
-      <path
-        d={path}
-        fill="none"
-        stroke="transparent"
-        strokeWidth={10}
-        className="opacity-0"
-      />
+      {onClick && (
+        <path
+          d={path}
+          fill="none"
+          stroke="transparent"
+          strokeWidth={10}
+          className="opacity-0"
+          pointerEvents="stroke"
+        />
+      )}
     </g>
   );
 };

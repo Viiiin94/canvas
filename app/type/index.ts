@@ -1,3 +1,5 @@
+//  Docs Type
+
 export type BlockType =
   | "div"
   | "text"
@@ -14,6 +16,8 @@ export type TextHandle = {
   focus: () => void;
 };
 
+// Data Modeling Type
+
 export type Parameter = {
   id: string;
   name: string;
@@ -23,10 +27,19 @@ export type Parameter = {
 export type Table = {
   id: number;
   name: string;
-  parameters: number;
+  parameters: number | Parameter[];
+  position?: { x: number; y: number };
+  size?: { width: number; height: number };
 };
 
-export type Line = {
-  from: number;
-  to: number;
+export type Connection = {
+  id: string;
+  fromTableId: number;
+  toTableId: number;
+};
+
+export type ConnectionPoint = {
+  x: number;
+  y: number;
+  tableId: number;
 };

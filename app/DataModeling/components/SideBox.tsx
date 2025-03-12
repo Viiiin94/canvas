@@ -8,7 +8,7 @@ interface SideBoxProps {
 
 const SideBox = ({ onAddSection }: SideBoxProps) => {
   return (
-    <aside className="fixed right-4 top-4 bg-white p-4 rounded-lg shadow-md z-10 flex flex-col gap-3">
+    <aside className="fixed right-10 top-16 bg-white p-4 rounded-lg shadow-md z-10 flex flex-col gap-3">
       <h3 className="text-lg font-semibold mb-2">도구 상자</h3>
       <button
         onClick={onAddSection}
