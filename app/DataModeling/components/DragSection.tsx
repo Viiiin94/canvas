@@ -287,18 +287,15 @@ const DragSection = ({
                     />
                   </td>
                   <td className="py-1 px-2">
-                    <select
+                    <input
+                      type="text"
                       value={param.type}
                       onChange={(e) =>
                         handleParameterChange(param.id, "type", e.target.value)
                       }
-                      className="w-full text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 py-0.5 appearance-none cursor-pointer"
-                    >
-                      <option value="string">String</option>
-                      <option value="number">Number</option>
-                      <option value="boolean">Boolean</option>
-                      <option value="date">Date</option>
-                    </select>
+                      className="w-full text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 py-0.5"
+                      placeholder="Field type"
+                    />
                   </td>
                   <td className="py-1 px-1 text-center">
                     <button

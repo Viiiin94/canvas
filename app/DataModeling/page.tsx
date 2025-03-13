@@ -215,12 +215,12 @@ export default function DataModeling() {
       <SideBox onAddSection={() => setIsModalOpen(true)} />
 
       <main
-        className="w-full h-full p-8 bg-gray-100 rounded-lg shadow-sm"
+        className="w-full h-full p-4 bg-gray-100 rounded-lg shadow-sm"
         ref={containerRef}
       >
         <article
           ref={articleRef}
-          className="w-[297mm] h-[210mm] mx-auto bg-white shadow-lg p-[20mm] box-border overflow-hidden relative"
+          className="w-full h-[210mm] mx-auto bg-white shadow-lg p-1 box-border overflow-hidden relative"
         >
           {/* SVG layer for connections - lower z-index */}
           <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none">

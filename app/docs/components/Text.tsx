@@ -128,7 +128,8 @@ const Text = forwardRef<TextHandle, TextProps>(
           className={`group relative min-h-[1.5em] flex flex-col items-start gap-2 transition-all duration-200 
           ${isDragging ? "opacity-100" : "opacity-100"}
           ${isDraggedOver ? "z-10" : "z-0"}
-          ${dragPosition === "before" && "border-blue-500"}`}
+          ${dragPosition === "after" && "border-b-blue-500"}
+          ${dragPosition === "before" && "border-t-blue-500"}`}
           onDragOver={onDragOver}
           onDrop={(e) => onDrop(e, id)}
         >

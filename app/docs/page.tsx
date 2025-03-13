@@ -182,8 +182,8 @@ export default function Docs() {
         <article
           ref={printRef}
           className="w-[210mm] h-[297mm] mx-auto bg-white
-                            shadow-lg p-[20mm] box-border overflow-y-auto
-                            print:shadow-none print:p-0"
+                    shadow-lg p-[20mm] box-border overflow-y-auto
+                    print:shadow-none"
         >
           <div className="space-y-1">
             {blocks.map((block) => (
