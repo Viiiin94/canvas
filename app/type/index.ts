@@ -43,3 +43,22 @@ export type ConnectionPoint = {
   y: number;
   tableId: number;
 };
+
+//QR Menu
+
+export type MenuItem = {
+  id: string;
+  name: {
+    [key: string]: string;
+  };
+  description: {
+    [key: string]: string;
+  };
+  price: number;
+  imageUrl: string;
+  category: string;
+  allergens?: { [key: string]: string[] };
+  isPopular?: boolean;
+  spicyLevel?: number;
+  preparationTime?: number;
+};

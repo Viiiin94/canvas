@@ -9,6 +9,10 @@ const links = [
     url: "dataModeling",
     name: "데이터 모델링",
   },
+  {
+    url: "qrMenu",
+    name: "QR 메뉴",
+  },
 ];
 
 export default function Home() {
