@@ -23,13 +23,13 @@ export default function MenuList({ restaurantId, language }: MenuListProps) {
     setMenuItems(dummyData);
     const uniqueCategories = [
       "all",
-      ...new Set(dummyData.map((item) => item.category)),
+      ...new Set(dummyData.map(item => item.category)),
     ];
     setCategories(uniqueCategories);
     setIsLoading(false);
   }, [restaurantId]);
 
-  const filteredItems = menuItems.filter((item) => {
+  const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name[language]
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -64,7 +64,7 @@ export default function MenuList({ restaurantId, language }: MenuListProps) {
           type="text"
           placeholder="메뉴 검색..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -72,7 +72,7 @@ export default function MenuList({ restaurantId, language }: MenuListProps) {
       {/* 카테고리 선택 */}
       <div className="sticky top-16 bg-gray-50 z-10">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((category) => (
+          {categories.map(category => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
@@ -90,7 +90,7 @@ export default function MenuList({ restaurantId, language }: MenuListProps) {
 
       {/* 메뉴 목록 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
+        {filteredItems.map(item => (
           <div
             key={item.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"

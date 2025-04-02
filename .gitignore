@@ -34,7 +34,14 @@ yarn-error.log*
 .env*
 
 # vercel
-.vercel
+.verce
+
+# cursor
+.cursor
+.cursorrules
+
+# vscode
+.vscode
 
 # typescript
 *.tsbuildinfo

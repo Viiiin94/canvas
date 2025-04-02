@@ -28,7 +28,7 @@ export default function Docs() {
     null
   );
 
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement | null>(null);
   const handlePrint = useReactToPrint({ contentRef: printRef });
 
   useEffect(() => {
@@ -37,8 +37,8 @@ export default function Docs() {
 
   const handleEvent = {
     enter: (id: string) => {
-      setBlocks((prev) => {
-        const index = prev.findIndex((block) => block.id === id);
+      setBlocks(prev => {
+        const index = prev.findIndex(block => block.id === id);
         if (index === -1) return prev;
 
         const newBlock: Block = {
@@ -63,8 +63,8 @@ export default function Docs() {
     },
 
     backspace: (id: string) => {
-      setBlocks((prev) => {
-        const index = prev.findIndex((block) => block.id === id);
+      setBlocks(prev => {
+        const index = prev.findIndex(block => block.id === id);
         if (index <= 0) return prev;
 
         const newBlocks = prev.filter((_, i) => i !== index);
@@ -78,20 +78,20 @@ export default function Docs() {
     },
 
     update: (id: string, content: string) => {
-      setBlocks((prev) =>
-        prev.map((block) => (block.id === id ? { ...block, content } : block))
+      setBlocks(prev =>
+        prev.map(block => (block.id === id ? { ...block, content } : block))
       );
     },
 
     arrowUp: (id: string) => {
-      const index = blocks.findIndex((block) => block.id === id);
+      const index = blocks.findIndex(block => block.id === id);
       if (index > 0) {
         blocks[index - 1].ref.current?.focus();
       }
     },
 
     arrowDown: (id: string) => {
-      const index = blocks.findIndex((block) => block.id === id);
+      const index = blocks.findIndex(block => block.id === id);
       if (index < blocks.length - 1) {
         blocks[index + 1].ref.current?.focus();
       }
@@ -133,10 +133,10 @@ export default function Docs() {
         return;
       }
 
-      setBlocks((prev) => {
+      setBlocks(prev => {
         const items = [...prev];
-        const draggedIndex = items.findIndex((item) => item.id === draggedId);
-        const targetIndex = items.findIndex((item) => item.id === targetId);
+        const draggedIndex = items.findIndex(item => item.id === draggedId);
+        const targetIndex = items.findIndex(item => item.id === targetId);
 
         let newTargetIndex = targetIndex;
         if (dragPosition === "after") {
@@ -163,8 +163,8 @@ export default function Docs() {
     },
 
     changeType: (id: string, newType: BlockType, newContent: string) => {
-      setBlocks((prev) =>
-        prev.map((block) =>
+      setBlocks(prev =>
+        prev.map(block =>
           block.id === id
             ? { ...block, type: newType, content: newContent }
             : block
@@ -186,7 +186,7 @@ export default function Docs() {
                     print:shadow-none"
         >
           <div className="space-y-1">
-            {blocks.map((block) => (
+            {blocks.map(block => (
               <div key={block.id} data-id={block.id} className="relative">
                 <Text
                   ref={block.ref}
